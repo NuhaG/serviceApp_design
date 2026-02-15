@@ -17,6 +17,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import { mockProviders } from "../data/mock-data";
+import { useThemeClass } from "../hooks/useThemeClass";
 
 export function BookingConfirmationPage() {
   const { providerId } = useParams();
@@ -27,8 +28,9 @@ export function BookingConfirmationPage() {
   const [bookingType, setBookingType] = useState<"one-time" | "contract">("one-time");
 
   if (!provider) {
+    const themeClass = useThemeClass();
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
         <Navigation />
         <div className="max-w-7xl mx-auto px-4 py-20 text-center">
           <h1 className="text-2xl font-bold">Provider not found</h1>
@@ -51,14 +53,16 @@ export function BookingConfirmationPage() {
     navigate("/user-dashboard");
   };
 
+  const themeClass = useThemeClass();
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
       <Navigation />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Confirm Your Booking</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold mb-2">Confirm Your Booking</h1>
+          <p className="text-muted-foreground">
             Review the details and complete your service booking
           </p>
         </div>
@@ -79,10 +83,10 @@ export function BookingConfirmationPage() {
                   <h3 className="font-semibold text-lg">{provider.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                       <span className="text-sm font-medium">{provider.rating}</span>
                     </div>
-                    <span className="text-gray-300">•</span>
+                    <span className="text-muted-foreground">•</span>
                     <Badge variant="secondary" className="rounded-lg">
                       {provider.reliabilityScore}% Reliability
                     </Badge>
@@ -154,7 +158,7 @@ export function BookingConfirmationPage() {
                   className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                     bookingType === "one-time"
                       ? "border-primary bg-primary/5"
-                      : "border-gray-200 hover:border-gray-300"
+                      : "border-border hover:border-border"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -163,7 +167,7 @@ export function BookingConfirmationPage() {
                       <CheckCircle className="w-5 h-5 text-primary" />
                     )}
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Book for a single service appointment
                   </p>
                 </div>
@@ -172,7 +176,7 @@ export function BookingConfirmationPage() {
                   className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
                     bookingType === "contract"
                       ? "border-accent bg-accent/5"
-                      : "border-gray-200 hover:border-gray-300"
+                      : "border-border hover:border-border"
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -181,7 +185,7 @@ export function BookingConfirmationPage() {
                       <CheckCircle className="w-5 h-5 text-accent" />
                     )}
                   </div>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     Regular service with recurring appointments
                   </p>
                 </div>
@@ -190,14 +194,14 @@ export function BookingConfirmationPage() {
 
             {/* Warnings */}
             {provider.cancellations > 3 && (
-              <Card className="p-4 rounded-xl bg-yellow-50 border-yellow-200">
+              <Card className="p-4 rounded-xl bg-amber-50 border-amber-200">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm">
-                    <div className="font-semibold text-yellow-900 mb-1">
+                    <div className="font-semibold text-amber-900 mb-1">
                       Provider Cancellation Notice
                     </div>
-                    <div className="text-yellow-800">
+                    <div className="text-amber-800">
                       This provider has {provider.cancellations} previous cancellations. If they
                       cancel this booking, their reliability score will drop by 5-10 points.
                     </div>
@@ -226,8 +230,8 @@ export function BookingConfirmationPage() {
               <h2 className="font-semibold mb-4">Booking Summary</h2>
 
               <div className="space-y-3 mb-6">
-                <div className="p-3 bg-gray-50 rounded-xl">
-                  <div className="text-xs text-gray-600 mb-1">Date & Time</div>
+                <div className="p-3 bg-muted rounded-xl">
+                  <div className="text-xs text-muted-foreground mb-1">Date & Time</div>
                   <div className="font-medium">
                     {date?.toLocaleDateString("en-US", {
                       weekday: "long",
@@ -236,11 +240,11 @@ export function BookingConfirmationPage() {
                       day: "numeric",
                     })}
                   </div>
-                  <div className="text-sm text-gray-700">{time}</div>
+                  <div className="text-sm text-muted-foreground">{time}</div>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-xl">
-                  <div className="text-xs text-gray-600 mb-1">Booking Type</div>
-                  <div className="font-medium capitalize">{bookingType}</div>
+                <div className="p-3 bg-muted rounded-xl">
+                  <div className="text-xs text-muted-foreground mb-1">Booking Type</div>
+                  <div className="font-medium capitalize text-muted-foreground">{bookingType}</div>
                 </div>
               </div>
 
@@ -249,28 +253,28 @@ export function BookingConfirmationPage() {
               <div className="space-y-2 mb-4">
                 <h3 className="font-semibold mb-3">Price Breakdown</h3>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Base Price</span>
+                  <span className="text-muted-foreground">Base Price</span>
                   <span className="font-medium">${provider.basePrice}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Booking Charge</span>
+                  <span className="text-muted-foreground">Booking Charge</span>
                   <span className="font-medium">${provider.bookingCharge}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Consultation Fee</span>
+                  <span className="text-muted-foreground">Consultation Fee</span>
                   <span className="font-medium">${provider.consultationFee}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Service Fee</span>
+                  <span className="text-muted-foreground">Service Fee</span>
                   <span className="font-medium">${provider.serviceFee}</span>
                 </div>
                 {hasPreviousCancellations && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600 flex items-center gap-1">
+                    <span className="text-muted-foreground flex items-center gap-1">
                       Cancellation Insurance
-                      <AlertTriangle className="w-3 h-3 text-yellow-600" />
+                      <AlertTriangle className="w-3 h-3 text-amber-600" />
                     </span>
-                    <span className="font-medium text-yellow-700">${cancellationFee}</span>
+                    <span className="font-medium text-amber-700">${cancellationFee}</span>
                   </div>
                 )}
                 <Separator className="my-2" />
@@ -281,7 +285,7 @@ export function BookingConfirmationPage() {
               </div>
 
               {hasPreviousCancellations && (
-                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-xs text-yellow-800">
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
                   Cancellation insurance added due to provider's previous cancellations
                 </div>
               )}
@@ -306,17 +310,17 @@ export function BookingConfirmationPage() {
 
               <Separator className="my-4" />
 
-              <div className="space-y-2 text-xs text-gray-600">
+              <div className="space-y-2 text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-3 h-3 text-green-600" />
+                  <CheckCircle className="w-3 h-3 text-emerald-600" />
                   <span>Secure payment processing</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-3 h-3 text-green-600" />
+                  <CheckCircle className="w-3 h-3 text-emerald-600" />
                   <span>Instant booking confirmation</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-3 h-3 text-green-600" />
+                  <CheckCircle className="w-3 h-3 text-emerald-600" />
                   <span>24/7 customer support</span>
                 </div>
               </div>

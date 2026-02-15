@@ -1,60 +1,275 @@
 import { Link, useLocation } from "react-router";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
-import { User, Briefcase, Shield } from "lucide-react";
+import {
+  User,
+  Briefcase,
+  Shield,
+  Menu,
+  X,
+  Sun,
+  Moon,
+} from "lucide-react";
 
 export function Navigation() {
   const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light' | null>(null);
+
+  // Initialize and listen for theme changes
+  useEffect(() => {
+    const updateTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark');
+      setTheme(isDark ? 'dark' : 'light');
+    };
+
+    // Set initial theme from DOM
+    updateTheme();
+
+    // Listen for theme changes from CustomEvent (dispatched by toggle button)
+    window.addEventListener('themechange', updateTheme);
+    // Listen for storage changes (from other tabs)
+    window.addEventListener('storage', updateTheme);
+    // Listen for direct class changes on html element
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => {
+      window.removeEventListener('themechange', updateTheme);
+      window.removeEventListener('storage', updateTheme);
+      observer.disconnect();
+    };
+  }, []);
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const navItem = (path: string) =>
+    `
+    relative rounded-xl transition-all duration-200
+    ${isActive(path)
+      ? "bg-primary text-primary-foreground shadow-sm"
+      : "hover:bg-[var(--color-secondary-hover)] hover:text-foreground"
+    }
+  `;
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+    <nav className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-white" />
+
+          {/* Logo */}
+          <Link
+            to="/"
+            className="flex items-center space-x-2 sm:space-x-3 group"
+          >
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary rounded-2xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+              <Briefcase className="w-4 sm:w-5 h-4 sm:h-5 text-primary-foreground" />
             </div>
-            <span className="text-xl font-semibold text-gray-900">ServiceHub</span>
+            <span className="text-sm sm:text-lg font-semibold tracking-tight text-foreground">
+              ApnaSahara
+            </span>
           </Link>
 
-          <div className="flex items-center space-x-4">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-2">
+
             <Link to="/search">
               <Button
-                variant={location.pathname === "/search" ? "default" : "ghost"}
-                className="rounded-xl"
+                variant="ghost"
+                className={navItem("/search")}
               >
                 Find Services
               </Button>
             </Link>
+
             <Link to="/user-dashboard">
               <Button
-                variant={location.pathname === "/user-dashboard" ? "default" : "outline"}
-                className="rounded-xl"
+                variant="ghost"
+                className={navItem("/user-dashboard")}
               >
                 <User className="w-4 h-4 mr-2" />
                 My Bookings
               </Button>
             </Link>
+
             <Link to="/provider-dashboard">
               <Button
-                variant={location.pathname === "/provider-dashboard" ? "default" : "outline"}
-                className="rounded-xl bg-accent hover:bg-accent/90 text-white border-accent"
+                variant="ghost"
+                className={navItem("/provider-dashboard")}
               >
                 <Briefcase className="w-4 h-4 mr-2" />
                 Provider
               </Button>
             </Link>
+
             <Link to="/admin">
               <Button
-                variant={location.pathname === "/admin" ? "default" : "ghost"}
+                variant="ghost"
                 size="icon"
-                className="rounded-xl"
+                className={navItem("/admin")}
               >
                 <Shield className="w-4 h-4" />
               </Button>
             </Link>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                const isDark = document.documentElement.classList.contains('dark');
+                const next = isDark ? 'light' : 'dark';
+                // Update state immediately for instant UI feedback
+                setTheme(next);
+                // Update DOM
+                if (next === 'dark') {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+                // Update storage
+                try { localStorage.setItem('theme', next); } catch (e) {}
+                // Dispatch event to notify other listeners
+                try { window.dispatchEvent(new CustomEvent('themechange', { detail: next })); } catch (e) {}
+              }}
+              className="rounded-xl hover:bg-[var(--color-secondary-hover)]"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
+            </Button>
+
+          </div>
+
+          {/* Mobile Toggle */}
+          <div className="md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpen(!open)}
+              className="rounded-xl hover:bg-[var(--color-secondary-hover)]"
+            >
+              {open ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Dropdown */}
+      {open && (
+        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
+          <div className="px-4 py-6 space-y-3">
+
+            <Link to="/search" onClick={() => setOpen(false)}>
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${navItem("/search")}`}
+              >
+                Find Services
+              </Button>
+            </Link>
+
+            <Link to="/user-dashboard" onClick={() => setOpen(false)}>
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${navItem("/user-dashboard")}`}
+              >
+                <User className="w-4 h-4 mr-2" />
+                My Bookings
+              </Button>
+            </Link>
+
+            <Link to="/provider-dashboard" onClick={() => setOpen(false)}>
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${navItem("/provider-dashboard")}`}
+              >
+                <Briefcase className="w-4 h-4 mr-2" />
+                Provider
+              </Button>
+            </Link>
+
+            <Link to="/admin" onClick={() => setOpen(false)}>
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${navItem("/admin")}`}
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Admin
+              </Button>
+            </Link>
+
+            <div className="pt-2">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+                onClick={() => {
+                  const isDark = document.documentElement.classList.contains('dark');
+                  const next = isDark ? 'light' : 'dark';
+                  // Update state immediately for instant UI feedback
+                  setTheme(next);
+                  // Update DOM
+                  if (next === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                  // Update storage
+                  try { localStorage.setItem('theme', next); } catch (e) {}
+                  // Dispatch event to notify other listeners
+                  try { window.dispatchEvent(new CustomEvent('themechange', { detail: next })); } catch (e) {}
+                }}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-4 h-4 mr-2" />
+                ) : (
+                  <Moon className="w-4 h-4 mr-2" />
+                )}
+                Toggle Theme
+              </Button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </nav>
   );
+}
+
+// initialize theme state on mount
+// (placed after component to keep logic colocated)
+function useInitializeTheme(setTheme: (t: 'dark'|'light'|null)=>void) {
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('theme');
+      if (stored === 'dark') {
+        document.documentElement.classList.add('dark');
+        setTheme('dark');
+        return;
+      }
+      if (stored === 'light') {
+        document.documentElement.classList.remove('dark');
+        setTheme('light');
+        return;
+      }
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        document.documentElement.classList.add('dark');
+        setTheme('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        setTheme('light');
+      }
+    } catch (e) {
+      setTheme('light');
+    }
+  }, [setTheme]);
 }

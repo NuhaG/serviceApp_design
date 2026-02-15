@@ -1,6 +1,6 @@
 @custom-variant dark (&:is(.dark *));
 
-:root {
+/* :root {
   --font-size: 16px;
   --background: #ffffff;
   --foreground: oklch(0.145 0 0);
@@ -76,9 +76,121 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+} */
+
+:root {
+  --font-size: 16px;
+
+  /* Background & foreground */
+  --background: #f8f2ed; /* warm light background */
+  --foreground: #1a1d26; /* dark text */
+
+  /* Cards & popovers */
+  --card: #ffffff;
+  --card-foreground: #1a1d26;
+  --popover: #ffffff;
+  --popover-foreground: #1a1d26;
+
+  /* Primary colors */
+  --primary: #ff7f7f; /* saturated pink */
+  --primary-hover: #ff9999;
+  --primary-foreground: #1a1d26;
+
+  /* Secondary colors */
+  --secondary: #f0e8e5; /* soft neutral secondary */
+  --secondary-hover: #e8ded9;
+  --secondary-foreground: #1a1d26;
+
+  /* Accent colors */
+  --accent: #ff7f7f;
+  --accent-hover: #ff9999;
+  --accent-foreground: #1a1d26;
+
+  /* Muted colors */
+  --muted: #ede8ea; /* neutral muted */
+  --muted-foreground: #6b6e7f;
+
+  /* Destructive colors */
+  --destructive: #ff7f7f;
+  --destructive-hover: #ff9999;
+  --destructive-foreground: #1a1d26;
+
+  /* Borders, inputs, rings */
+  --border: rgba(0, 0, 0, 0.1);
+  --input: #ffffff;
+  --input-background: #f8f2ed;
+  --switch-background: #ff7f7f;
+  --ring: #ff9999;
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* Sidebar */
+  --sidebar: #f8f2ed; /* warm sidebar */
+  --sidebar-foreground: #1a1d26;
+  --sidebar-primary: #ff7f7f;
+  --sidebar-primary-foreground: #1a1d26;
+  --sidebar-accent: #f0e8e5;
+  --sidebar-accent-foreground: #1a1d26;
+  --sidebar-border: rgba(0, 0, 0, 0.1);
+  --sidebar-ring: #ff9999;
+}
+
+.dark {
+  --background: #1a1d26;
+  --foreground: #fff2ef;
+
+  --card: #2f3548;
+  --card-foreground: #fff2ef;
+
+  --popover: #2f3548;
+  --popover-foreground: #fff2ef;
+
+  --primary: #f7a5a5;
+  --primary-hover: #e88e8e;
+  --primary-foreground: #1a1d26;
+
+  --secondary: #3a4158;
+  --secondary-hover: #444c66;
+  --secondary-foreground: #fff2ef;
+
+  --accent: #f7a5a5;
+  --accent-hover: #e88e8e;
+  --accent-foreground: #1a1d26;
+
+  --muted: #2f3548;
+  --muted-foreground: #fff2ef;
+
+  --destructive: #f7a5a5;
+  --destructive-hover: #e88e8e;
+  --destructive-foreground: #1a1d26;
+
+  /* Slightly darker border for separation */
+  --border: rgba(93, 104, 138, 0.4);
+
+  --input: #2f3548;
+  --ring: #e88e8e;
+
+  --radius: 0.75rem;
+
+  --sidebar: #242936;
+  --sidebar-foreground: #fff2ef;
+
+  --sidebar-primary: #f7a5a5;
+  --sidebar-primary-foreground: #1a1d26;
+
+  --sidebar-accent: #3a4158;
+  --sidebar-accent-foreground: #fff2ef;
+
+  --sidebar-border: rgba(93, 104, 138, 0.4);
+  --sidebar-ring: #e88e8e;
 }
 
 @theme inline {
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-accent-hover: var(--accent-hover);
+  --color-destructive-hover: var(--destructive-hover);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -126,7 +238,12 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
   }
 
   /**

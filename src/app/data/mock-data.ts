@@ -15,6 +15,7 @@ export interface Provider {
   consultationFee: number;
   serviceFee: number;
   bookingCharge: number;
+  location: string;
 }
 
 export interface Review {
@@ -40,11 +41,11 @@ export interface Booking {
 export const mockProviders: Provider[] = [
   {
     id: "1",
-    name: "Sarah Johnson",
+    name: "Priya Sharma",
     rating: 4.9,
     reliabilityScore: 98,
     basePrice: 50,
-    distance: "0.8 mi",
+    distance: "0.8 km",
     acceptRate: 95,
     rejectRate: 5,
     photo: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
@@ -54,24 +55,25 @@ export const mockProviders: Provider[] = [
     bookingCharge: 5,
     totalBookings: 342,
     cancellations: 3,
+    location: "Kurla",
     reviews: [
       {
         id: "r1",
-        userName: "John D.",
+        userName: "Rohan Desai",
         rating: 5,
         comment: "Excellent service! Very thorough and professional.",
         date: "2026-02-10",
       },
       {
         id: "r2",
-        userName: "Maria S.",
+        userName: "Meera Patil",
         rating: 5,
         comment: "Best cleaning service I've used. Highly reliable!",
         date: "2026-02-08",
       },
       {
         id: "r3",
-        userName: "David K.",
+        userName: "Arjun Kulkarni",
         rating: 4,
         comment: "Great work, arrived on time.",
         date: "2026-02-05",
@@ -80,11 +82,11 @@ export const mockProviders: Provider[] = [
   },
   {
     id: "2",
-    name: "Michael Chen",
+    name: "Rahul Mehta",
     rating: 4.8,
     reliabilityScore: 95,
     basePrice: 65,
-    distance: "1.2 mi",
+    distance: "1.2 km",
     acceptRate: 92,
     rejectRate: 8,
     photo: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
@@ -94,17 +96,18 @@ export const mockProviders: Provider[] = [
     bookingCharge: 5,
     totalBookings: 287,
     cancellations: 5,
+    location: "Andheri",
     reviews: [
       {
         id: "r4",
-        userName: "Lisa M.",
+        userName: "Sneha Iyer",
         rating: 5,
         comment: "Fixed my leak quickly and efficiently!",
         date: "2026-02-12",
       },
       {
         id: "r5",
-        userName: "Robert T.",
+        userName: "Vikram Joshi",
         rating: 5,
         comment: "Very knowledgeable and professional.",
         date: "2026-02-09",
@@ -113,11 +116,11 @@ export const mockProviders: Provider[] = [
   },
   {
     id: "3",
-    name: "Emma Williams",
+    name: "Ananya Nair",
     rating: 4.7,
     reliabilityScore: 93,
     basePrice: 45,
-    distance: "2.1 mi",
+    distance: "2.1 km",
     acceptRate: 88,
     rejectRate: 12,
     photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400",
@@ -127,10 +130,11 @@ export const mockProviders: Provider[] = [
     bookingCharge: 5,
     totalBookings: 456,
     cancellations: 12,
+    location: "Bandra",
     reviews: [
       {
         id: "r6",
-        userName: "Alex P.",
+        userName: "Karan Malhotra",
         rating: 5,
         comment: "My dog loves her! Very caring and reliable.",
         date: "2026-02-11",
@@ -139,11 +143,11 @@ export const mockProviders: Provider[] = [
   },
   {
     id: "4",
-    name: "James Rodriguez",
+    name: "Siddharth Rao",
     rating: 4.9,
     reliabilityScore: 97,
     basePrice: 80,
-    distance: "1.5 mi",
+    distance: "1.5 km",
     acceptRate: 96,
     rejectRate: 4,
     photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400",
@@ -153,10 +157,11 @@ export const mockProviders: Provider[] = [
     bookingCharge: 5,
     totalBookings: 198,
     cancellations: 2,
+    location: "Malad",
     reviews: [
       {
         id: "r7",
-        userName: "Susan L.",
+        userName: "Neha Kapoor",
         rating: 5,
         comment: "Expert electrician, very professional!",
         date: "2026-02-13",
@@ -165,11 +170,11 @@ export const mockProviders: Provider[] = [
   },
   {
     id: "5",
-    name: "Olivia Martinez",
+    name: "Aditi Verma",
     rating: 4.6,
     reliabilityScore: 91,
     basePrice: 55,
-    distance: "3.2 mi",
+    distance: "3.2 km",
     acceptRate: 85,
     rejectRate: 15,
     photo: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400",
@@ -179,10 +184,11 @@ export const mockProviders: Provider[] = [
     bookingCharge: 5,
     totalBookings: 234,
     cancellations: 8,
+    location: "Borivali",
     reviews: [
       {
         id: "r8",
-        userName: "Tom B.",
+        userName: "Suresh Pawar",
         rating: 4,
         comment: "Good work, made my garden look great.",
         date: "2026-02-07",
@@ -191,11 +197,11 @@ export const mockProviders: Provider[] = [
   },
   {
     id: "6",
-    name: "Daniel Kim",
+    name: "Manoj Kulkarni",
     rating: 4.9,
     reliabilityScore: 99,
     basePrice: 70,
-    distance: "0.5 mi",
+    distance: "0.5 km",
     acceptRate: 98,
     rejectRate: 2,
     photo: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400",
@@ -205,10 +211,11 @@ export const mockProviders: Provider[] = [
     bookingCharge: 5,
     totalBookings: 412,
     cancellations: 1,
+    location: "Vashi",
     reviews: [
       {
         id: "r9",
-        userName: "Nancy R.",
+        userName: "Pooja Deshmukh",
         rating: 5,
         comment: "Amazing service! Fixed my AC in no time.",
         date: "2026-02-14",
