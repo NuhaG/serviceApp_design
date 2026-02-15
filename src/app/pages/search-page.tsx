@@ -288,7 +288,7 @@ export function SearchPage() {
                                     ⭐ {provider.rating} • {provider.reliabilityScore}% reliable
                                   </div>
                                   <div className="text-xs text-primary font-medium mt-1">
-                                    {provider.distance} away
+                                    {provider.distance} 
                                   </div>
                                 </div>
                               </div>

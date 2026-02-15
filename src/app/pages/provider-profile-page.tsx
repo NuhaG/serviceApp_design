@@ -67,7 +67,7 @@ export function ProviderProfilePage() {
                         <span className="text-gray-300">•</span>
                         <div className="flex items-center gap-1 text-gray-600">
                           <MapPin className="w-4 h-4" />
-                          {provider.distance} away
+                          {provider.location}
                         </div>
                       </div>
                     </div>
