@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigation } from "../components/navigation";
 import { ProviderCard } from "../components/provider-card";
 import { Button } from "../components/ui/button";
@@ -15,28 +15,104 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
-import { Search, MapPin, List, Map as MapIcon, SlidersHorizontal } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  List,
+  Map as MapIcon,
+  SlidersHorizontal,
+} from "lucide-react";
 import { mockProviders } from "../data/mock-data";
 import { useThemeClass } from "../hooks/useThemeClass";
 
+// Leaflet imports
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
+// Fix marker icons
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
 export function SearchPage() {
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
-  const [serviceType, setServiceType] = useState<"one-time" | "contract">("one-time");
+  const [serviceType, setServiceType] = useState<"one-time" | "contract">(
+    "one-time"
+  );
   const [priceRange, setPriceRange] = useState([0, 200]);
   const [minRating, setMinRating] = useState([0]);
   const [minReliability, setMinReliability] = useState([0]);
   const [showFilters, setShowFilters] = useState(true);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(
+    null
+  );
+  const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Get user location
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
+      () => console.log("User denied location")
+    );
+  }, []);
 
   const filteredProviders = mockProviders.filter((provider) => {
-    return (
-      provider.basePrice >= priceRange[0] &&
-      provider.basePrice <= priceRange[1] &&
-      provider.rating >= minRating[0] &&
-      provider.reliabilityScore >= minReliability[0]
-    );
+    // Match name or any of the services
+    const matchesSearch =
+      searchText === "" ||
+      provider.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      provider.services.some((s) =>
+        s.toLowerCase().includes(searchText.toLowerCase())
+      );
+
+    // Match category if selected
+    const matchesCategory =
+      !selectedCategory ||
+      provider.services.map((s) => s.toLowerCase()).includes(
+        selectedCategory.toLowerCase()
+      );
+
+    // Apply existing filters
+    const matchesPrice =
+      provider.basePrice >= priceRange[0] && provider.basePrice <= priceRange[1];
+    const matchesRating = provider.rating >= minRating[0];
+    const matchesReliability = provider.reliabilityScore >= minReliability[0];
+
+    return matchesSearch && matchesCategory && matchesPrice && matchesRating && matchesReliability;
   });
 
   const themeClass = useThemeClass();
+
+  // Helper: Distance in km
+  const getDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ) => {
+    const R = 6371; // km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
   return (
     <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
@@ -45,7 +121,9 @@ export function SearchPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search Header */}
         <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4">Find Service Providers</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-4">
+            Find Service Providers
+          </h1>
           <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
             <div className="flex-1 min-w-0">
               <div className="relative">
@@ -53,13 +131,18 @@ export function SearchPage() {
                 <Input
                   placeholder="Search for services..."
                   className="pl-10 h-10 sm:h-12 rounded-xl w-full"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                 />
               </div>
             </div>
             <div className="w-full sm:w-[250px]">
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input placeholder="Location" className="pl-10 h-10 sm:h-12 rounded-xl w-full" />
+                <Input
+                  placeholder="Location"
+                  className="pl-10 h-10 sm:h-12 rounded-xl w-full"
+                />
               </div>
             </div>
             <Button size="lg" className="rounded-xl px-6 w-full sm:w-auto">
@@ -79,7 +162,7 @@ export function SearchPage() {
               <SlidersHorizontal className="w-4 h-4 mr-2" />
               Filters
             </Button>
-            <div className="hidden sm:flex items-center gap-2 bg-card border-border rounded-xl p-1">
+            {/* <div className="hidden sm:flex items-center gap-2 bg-card border-border rounded-xl p-1">
               <Button
                 size="sm"
                 variant={serviceType === "one-time" ? "default" : "ghost"}
@@ -96,11 +179,13 @@ export function SearchPage() {
               >
                 Contract
               </Button>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            <span className="text-sm text-muted-foreground">{filteredProviders.length} providers</span>
+            <span className="text-sm text-muted-foreground">
+              {filteredProviders.length} providers
+            </span>
             <div className="hidden sm:flex items-center gap-1 bg-card border-border rounded-xl p-1">
               <Button
                 size="sm"
@@ -131,24 +216,25 @@ export function SearchPage() {
               <div className="space-y-6">
                 <div>
                   <Label className="mb-3 block">Service Category</Label>
-                  <Select>
+                  <Select onValueChange={(v) => setSelectedCategory(v)}>
                     <SelectTrigger className="rounded-xl">
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cleaning">House Cleaning</SelectItem>
-                      <SelectItem value="plumbing">Plumbing</SelectItem>
-                      <SelectItem value="electrical">Electrical Work</SelectItem>
-                      <SelectItem value="pet">Pet Care</SelectItem>
-                      <SelectItem value="garden">Gardening</SelectItem>
-                      <SelectItem value="ac">AC Repair</SelectItem>
+                      {Array.from(new Set(mockProviders.flatMap((p) => p.services))).map(
+                        (cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        )
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
                   <Label className="mb-3 block">
-                    Price Range: ${priceRange[0]} - ${priceRange[1]}
+                    Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}
                   </Label>
                   <Slider
                     min={0}
@@ -188,7 +274,7 @@ export function SearchPage() {
                   />
                 </div>
 
-                <div className="pt-4 border-t">
+                {/* <div className="pt-4 border-t">
                   <div className="flex items-center justify-between mb-2">
                     <Label>Verified Only</Label>
                     <Switch />
@@ -201,7 +287,7 @@ export function SearchPage() {
                     <Label>Available Now</Label>
                     <Switch />
                   </div>
-                </div>
+                </div> */}
 
                 <Button
                   variant="outline"
@@ -210,6 +296,8 @@ export function SearchPage() {
                     setPriceRange([0, 200]);
                     setMinRating([0]);
                     setMinReliability([0]);
+                    setSearchText("");        // Reset search input
+                    setSelectedCategory(null); // Reset category dropdown
                   }}
                 >
                   Clear Filters
@@ -228,98 +316,91 @@ export function SearchPage() {
                 {filteredProviders.length === 0 && (
                   <Card className="p-12 text-center rounded-xl">
                     <p className="text-muted-foreground">
-                      No providers found matching your filters. Try adjusting your search criteria.
+                      No providers found matching your filters. Try adjusting your
+                      search criteria.
                     </p>
                   </Card>
                 )}
               </div>
             ) : (
-              <Card className="p-0 rounded-xl overflow-hidden h-[400px] sm:h-[500px] lg:h-[800px] relative">
-                {/* Map View - Placeholder with markers */}
-                <div className="w-full h-full bg-muted relative">
-                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxkZWZzPjxwYXR0ZXJuIGlkPSJncmlkIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiPjxwYXRoIGQ9Ik0gNDAgMCBMIDAgMCAwIDQwIiBmaWxsPSJub25lIiBzdHJva2U9IiNlNWU3ZWIiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmlkKSIvPjwvc3ZnPg==')] opacity-30"></div>
+              <MapContainer
+                center={userLocation || [20.5937, 78.9629]}
+                zoom={12}
+                scrollWheelZoom={true}
+                className="w-full h-[400px] sm:h-[500px] lg:h-[800px] rounded-xl"
+                whenCreated={(map: L.Map) => {
+                  if (userLocation) {
+                    map.setView(userLocation, 13);
+                  }
+                }}
+              >
 
-                  {/* Map Controls */}
-                  <div className="absolute top-4 left-4 right-4 z-10">
-                    <Card className="p-4 rounded-xl shadow-lg">
-                      <div className="flex items-center justify-between">
-                        <Badge className="rounded-full">
-                          {filteredProviders.length} providers in your area
-                        </Badge>
-                        <Button size="sm" variant="outline" className="rounded-lg">
-                          Recenter Map
-                        </Button>
-                      </div>
-                    </Card>
-                  </div>
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; OpenStreetMap contributors'
+                />
 
-                  {/* Provider Markers */}
-                  {filteredProviders.slice(0, 6).map((provider, index) => {
-                    const positions = [
-                      { top: "20%", left: "25%" },
-                      { top: "35%", left: "60%" },
-                      { top: "50%", left: "30%" },
-                      { top: "60%", left: "70%" },
-                      { top: "75%", left: "40%" },
-                      { top: "45%", left: "80%" },
-                    ];
-                    const pos = positions[index] || positions[0];
+                {/* User Location (red) */}
+                {userLocation && (
+                  <Marker
+                    position={userLocation}
+                    icon={new L.Icon({
+                      iconUrl:
+                        "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+                      iconSize: [25, 41],
+                      iconAnchor: [12, 41],
+                      popupAnchor: [1, -34],
+                      shadowUrl:
+                        "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+                    })}
+                  >
+                    <Popup>You are here</Popup>
+                  </Marker>
+                )}
 
+                {/* Provider markers (blue) */}
+                {userLocation &&
+                  filteredProviders.map((provider) => {
+                    if (!provider.lat || !provider.lng) return null;
+                    const pos: [number, number] = [provider.lat, provider.lng];
                     return (
-                      <div
-                        key={provider.id}
-                        className="absolute z-20 group cursor-pointer"
-                        style={{ top: pos.top, left: pos.left }}
-                      >
-                        <div className="relative">
-                          <div className="w-12 h-12 bg-primary rounded-full border-4 border-border shadow-lg flex items-center justify-center transform group-hover:scale-110 transition-transform">
-                            <span className="text-white font-bold text-sm">
-                              ${provider.basePrice}
-                            </span>
-                          </div>
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Card className="p-3 rounded-xl shadow-xl w-64">
-                              <div className="flex gap-3">
-                                <img
-                                  src={provider.photo}
-                                  alt={provider.name}
-                                  className="w-12 h-12 rounded-lg object-cover"
-                                />
-                                <div className="flex-1">
-                                  <div className="font-semibold text-sm">{provider.name}</div>
-                                  <div className="text-xs text-muted-foreground">
-                                    ⭐ {provider.rating} • {provider.reliabilityScore}% reliable
-                                  </div>
-                                  <div className="text-xs text-primary font-medium mt-1">
-                                    {provider.distance} away
-                                  </div>
-                                </div>
+                      <div key={provider.id}>
+                        <Marker
+                          position={pos}
+                          icon={new L.Icon({
+                            iconUrl:
+                              "https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png",
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowUrl:
+                              "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+                          })}
+                        >
+                          <Popup>
+                            <div>
+                              <div className="font-semibold">{provider.name}</div>
+                              <div>
+                                ⭐ {provider.rating} • {provider.reliabilityScore}% reliable
                               </div>
-                            </Card>
-                          </div>
-                        </div>
+                              <div>
+                                {getDistance(
+                                  userLocation[0],
+                                  userLocation[1],
+                                  provider.lat,
+                                  provider.lng
+                                ).toFixed(1)}{" "}
+                                km away
+                              </div>
+                              <div className="font-medium">${provider.basePrice}</div>
+                            </div>
+                          </Popup>
+                        </Marker>
+
                       </div>
                     );
                   })}
-
-                  {/* Legend */}
-                  <div className="absolute bottom-4 right-4 z-10">
-                    <Card className="p-4 rounded-xl">
-                      <div className="text-xs font-semibold mb-2">Map Legend</div>
-                      <div className="space-y-1 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-primary rounded-full"></div>
-                          <span>Available Provider</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-accent rounded-full"></div>
-                          <span>Top Rated</span>
-                        </div>
-                      </div>
-                    </Card>
-                  </div>
-                </div>
-              </Card>
+              </MapContainer>
             )}
           </div>
         </div>

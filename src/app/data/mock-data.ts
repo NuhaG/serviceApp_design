@@ -16,6 +16,8 @@ export interface Provider {
   serviceFee: number;
   bookingCharge: number;
   location: string;
+  lat: number; // added
+  lng: number; // added
 }
 
 export interface Review {
@@ -56,6 +58,8 @@ export const mockProviders: Provider[] = [
     totalBookings: 342,
     cancellations: 3,
     location: "Kurla",
+    lat: 19.0701,
+    lng: 72.8826,
     reviews: [
       {
         id: "r1",
@@ -97,6 +101,8 @@ export const mockProviders: Provider[] = [
     totalBookings: 287,
     cancellations: 5,
     location: "Andheri",
+    lat: 19.1201,
+    lng: 72.8352,
     reviews: [
       {
         id: "r4",
@@ -131,6 +137,8 @@ export const mockProviders: Provider[] = [
     totalBookings: 456,
     cancellations: 12,
     location: "Bandra",
+    lat: 19.0600,
+    lng: 72.8350,
     reviews: [
       {
         id: "r6",
@@ -158,6 +166,8 @@ export const mockProviders: Provider[] = [
     totalBookings: 198,
     cancellations: 2,
     location: "Malad",
+    lat: 19.2000,
+    lng: 72.8600,
     reviews: [
       {
         id: "r7",
@@ -185,6 +195,8 @@ export const mockProviders: Provider[] = [
     totalBookings: 234,
     cancellations: 8,
     location: "Borivali",
+    lat: 19.2300,
+    lng: 72.8400,
     reviews: [
       {
         id: "r8",
@@ -212,6 +224,8 @@ export const mockProviders: Provider[] = [
     totalBookings: 412,
     cancellations: 1,
     location: "Vashi",
+    lat: 19.2200,
+    lng: 72.9100,
     reviews: [
       {
         id: "r9",

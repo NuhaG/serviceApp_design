@@ -35,15 +35,15 @@ export function ProviderCard({ provider }: ProviderCardProps) {
                   <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-amber-400 text-amber-400 flex-shrink-0" />
                   <span className="text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-500">{provider.rating}</span>
                 </div>
-                <span className="text-muted-foreground text-xs sm:text-sm">•</span>
-                <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+                {/* <span className="text-muted-foreground text-xs sm:text-sm">•</span> */}
+                {/* <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
                   <MapPin className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
                   <span className="line-clamp-1">{provider.distance}</span>
-                </div>
+                </div> */}
               </div>
             </div>
             <div className="text-right flex-shrink-0">
-              <div className="text-lg sm:text-2xl font-bold text-primary">${provider.basePrice}</div>
+              <div className="text-lg sm:text-2xl font-bold text-primary">₹{provider.basePrice}</div>
               <div className="text-xs text-muted-foreground font-medium">base price</div>
             </div>
           </div>
