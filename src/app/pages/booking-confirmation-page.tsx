@@ -15,6 +15,7 @@ import {
   AlertTriangle,
   CheckCircle,
   DollarSign,
+  IndianRupee
 } from "lucide-react";
 import { mockProviders } from "../data/mock-data";
 import { useThemeClass } from "../hooks/useThemeClass";
@@ -216,7 +217,7 @@ export function BookingConfirmationPage() {
                 <div className="text-sm">
                   <div className="font-semibold text-blue-900 mb-1">Cancellation Policy</div>
                   <div className="text-blue-800">
-                    If you cancel within 24 hours of the appointment, a $15 cancellation fee will
+                    If you cancel within 24 hours of the appointment, a ₹15 cancellation fee will
                     apply and your user rating may be affected.
                   </div>
                 </div>
@@ -254,19 +255,19 @@ export function BookingConfirmationPage() {
                 <h3 className="font-semibold mb-3">Price Breakdown</h3>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Base Price</span>
-                  <span className="font-medium">${provider.basePrice}</span>
+                  <span className="font-medium">₹{provider.basePrice}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Booking Charge</span>
-                  <span className="font-medium">${provider.bookingCharge}</span>
+                  <span className="font-medium">₹{provider.bookingCharge}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Consultation Fee</span>
-                  <span className="font-medium">${provider.consultationFee}</span>
+                  <span className="font-medium">₹{provider.consultationFee}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Service Fee</span>
-                  <span className="font-medium">${provider.serviceFee}</span>
+                  <span className="font-medium">₹{provider.serviceFee}</span>
                 </div>
                 {hasPreviousCancellations && (
                   <div className="flex justify-between text-sm">
@@ -274,13 +275,13 @@ export function BookingConfirmationPage() {
                       Cancellation Insurance
                       <AlertTriangle className="w-3 h-3 text-amber-600" />
                     </span>
-                    <span className="font-medium text-amber-700">${cancellationFee}</span>
+                    <span className="font-medium text-amber-700">₹{cancellationFee}</span>
                   </div>
                 )}
                 <Separator className="my-2" />
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total</span>
-                  <span className="text-primary">${total}</span>
+                  <span className="text-primary">₹{total}</span>
                 </div>
               </div>
 
@@ -295,8 +296,8 @@ export function BookingConfirmationPage() {
                 className="w-full rounded-xl mb-3"
                 onClick={handleConfirmBooking}
               >
-                <DollarSign className="w-5 h-5 mr-2" />
-                Confirm & Pay ${total}
+                <IndianRupee className="w-5 h-5 mr-2" />
+                Confirm & Pay ₹{total}
               </Button>
 
               <Button

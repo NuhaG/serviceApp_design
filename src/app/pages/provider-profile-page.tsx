@@ -210,7 +210,7 @@ export function ProviderProfilePage() {
             <Card className="p-4 sm:p-6 rounded-xl lg:sticky lg:top-24">
               <div className="mb-4 sm:mb-6">
                 <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
-                  ${provider.basePrice}
+                  ₹{provider.basePrice}
                   <span className="text-sm sm:text-base font-normal text-muted-foreground">/service</span>
                 </div>
                 <div className="text-xs sm:text-sm text-muted-foreground">Base price</div>
@@ -223,25 +223,25 @@ export function ProviderProfilePage() {
                 <div className="space-y-2 text-xs sm:text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Base Price</span>
-                    <span className="font-medium">${provider.basePrice}</span>
+                    <span className="font-medium">₹{provider.basePrice}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Booking Charge</span>
-                    <span className="font-medium">${provider.bookingCharge}</span>
+                    <span className="font-medium">₹{provider.bookingCharge}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Consultation Fee</span>
-                    <span className="font-medium">${provider.consultationFee}</span>
+                    <span className="font-medium">₹{provider.consultationFee}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Service Fee</span>
-                    <span className="font-medium">${provider.serviceFee}</span>
+                    <span className="font-medium">₹{provider.serviceFee}</span>
                   </div>
                   <Separator className="my-2" />
                   <div className="flex justify-between font-semibold text-sm sm:text-base">
                     <span>Total</span>
                     <span className="text-primary">
-                      $
+                      ₹
                       {provider.basePrice +
                         provider.bookingCharge +
                         provider.consultationFee +
