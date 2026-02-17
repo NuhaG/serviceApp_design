@@ -392,7 +392,7 @@ export function SearchPage() {
                                 ).toFixed(1)}{" "}
                                 km away
                               </div>
-                              <div className="font-medium">${provider.basePrice}</div>
+                              <div className="font-medium">₹{provider.basePrice}</div>
                             </div>
                           </Popup>
                         </Marker>

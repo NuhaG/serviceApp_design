@@ -85,9 +85,9 @@ export function ProviderDashboard() {
                 <DollarSign className="w-6 h-6 text-accent" />
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1">${stats.monthlyEarnings}</div>
+            <div className="text-3xl font-bold mb-1">₹{stats.monthlyEarnings}</div>
             <div className="text-sm text-muted-foreground">This Month</div>
-            <div className="text-xs text-muted-foreground mt-2">Total: ${stats.totalEarnings.toLocaleString()}</div>
+            <div className="text-xs text-muted-foreground mt-2">Total: ₹{stats.totalEarnings.toLocaleString()}</div>
           </Card>
 
           <Card className="p-6 rounded-xl">
@@ -165,7 +165,7 @@ export function ProviderDashboard() {
                       <p className="text-muted-foreground">{booking.service}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">${booking.amount}</div>
+                      <div className="text-2xl font-bold text-primary">₹{booking.amount}</div>
                       <div className="text-xs text-muted-foreground">Your earnings</div>
                     </div>
                   </div>
@@ -238,7 +238,7 @@ export function ProviderDashboard() {
                       <p className="text-muted-foreground">{booking.service}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">${booking.amount}</div>
+                      <div className="text-2xl font-bold text-primary">₹{booking.amount}</div>
                     </div>
                   </div>
 
@@ -302,7 +302,7 @@ export function ProviderDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-bold text-foreground">${booking.amount}</div>
+                      <div className="text-xl font-bold text-foreground">₹{booking.amount}</div>
                     </div>
                   </div>
                 </Card>

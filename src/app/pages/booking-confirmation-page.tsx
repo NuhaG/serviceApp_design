@@ -296,7 +296,7 @@ export function BookingConfirmationPage() {
                 className="w-full rounded-xl mb-3"
                 onClick={handleConfirmBooking}
               >
-                <IndianRupee className="w-5 h-5 mr-2" />
+                {/* <IndianRupee className="w-5 h-5 mr-2" /> */}
                 Confirm & Pay ₹{total}
               </Button>
 

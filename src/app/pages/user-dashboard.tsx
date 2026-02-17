@@ -28,9 +28,9 @@ export function UserDashboard() {
   const cancelledBookings = mockUserBookings.filter(b => b.status === "cancelled");
   const completedBookings = mockUserBookings.filter(b => b.status === "completed");
   const contractBookings = mockUserBookings.filter(b => b.type === "contract");
-  
+
   // Get average rating from providers
-  const avgRating = mockProviders.length > 0 
+  const avgRating = mockProviders.length > 0
     ? (mockProviders.reduce((sum, p) => sum + p.rating, 0) / mockProviders.length).toFixed(1)
     : 0;
 
@@ -59,7 +59,7 @@ export function UserDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
           <Card className="p-4 sm:p-6 rounded-xl">
             <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-50 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-amber-50 rounded-xl flex items-center justify-center">
                 <Star className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
               </div>
             </div>
@@ -69,11 +69,10 @@ export function UserDashboard() {
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-3 h-3 ${
-                    i < Math.floor(stats.personalRating)
+                  className={`w-3 h-3 ${i < Math.floor(stats.personalRating)
                       ? "fill-amber-400 text-amber-400"
                       : "text-muted-foreground"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -81,7 +80,7 @@ export function UserDashboard() {
 
           <Card className="p-4 sm:p-6 rounded-xl">
             <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-xl flex items-center justify-center">
                 <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
               </div>
             </div>
@@ -126,7 +125,7 @@ export function UserDashboard() {
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-500 flex-shrink-0 mt-0.5" />
               <div className="text-sm">
-                  <div className="font-semibold text-rose-700 dark:text-rose-600 mb-1">
+                <div className="font-semibold text-rose-700 dark:text-rose-600 mb-1">
                   High Cancellation Rate Warning
                 </div>
                 <div className="text-rose-600 dark:text-rose-500">
@@ -145,8 +144,8 @@ export function UserDashboard() {
             <Star className="w-5 h-5 text-amber-500" />
             <h2 className="text-xl font-semibold">Your Rating Breakdown</h2>
           </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
               <div className="flex justify-between mb-2">
                 <span className="text-sm font-medium">Overall Score</span>
                 <span className="text-sm font-bold text-primary">{stats.personalRating}/5.0</span>
@@ -195,19 +194,18 @@ export function UserDashboard() {
           {/* Active Bookings */}
           <TabsContent value="active" className="space-y-4">
             {mockUserBookings
-                .filter((b) => b.status === "confirmed" || b.status === "pending")
-                .map((booking) => (
-                  <Card key={booking.id} className="p-4 sm:p-6 rounded-xl">
+              .filter((b) => b.status === "confirmed" || b.status === "pending")
+              .map((booking) => (
+                <Card key={booking.id} className="p-4 sm:p-6 rounded-xl">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-lg">{booking.providerName}</h3>
                         <Badge
-                          className={`rounded-lg ${
-                            booking.status === "confirmed"
+                          className={`rounded-lg ${booking.status === "confirmed"
                               ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
                               : "bg-amber-500/15 text-amber-700 dark:text-amber-400"
-                          }`}
+                            }`}
                         >
                           {booking.status}
                         </Badge>
@@ -215,7 +213,7 @@ export function UserDashboard() {
                       <p className="text-muted-foreground">{booking.service}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">${booking.amount}</div>
+                      <div className="text-2xl font-bold text-primary">₹{booking.amount}</div>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -256,7 +254,7 @@ export function UserDashboard() {
                   <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 flex items-start gap-2">
                     <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-0.5" />
                     <span>
-                      Canceling within 24 hours will incur a $15 fee and may affect your user
+                      Canceling within 24 hours will incur a ₹15 fee and may affect your user
                       rating
                     </span>
                   </div>
@@ -264,14 +262,14 @@ export function UserDashboard() {
               ))}
             {mockUserBookings.filter((b) => b.status === "confirmed" || b.status === "pending")
               .length === 0 && (
-              <Card className="p-12 text-center rounded-xl">
-                <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground mb-4">No active bookings</p>
-                <Link to="/search">
-                  <Button className="rounded-xl">Browse Services</Button>
-                </Link>
-              </Card>
-            )}
+                <Card className="p-12 text-center rounded-xl">
+                  <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground mb-4">No active bookings</p>
+                  <Link to="/search">
+                    <Button className="rounded-xl">Browse Services</Button>
+                  </Link>
+                </Card>
+              )}
           </TabsContent>
 
           {/* History */}
@@ -319,7 +317,7 @@ export function UserDashboard() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-bold">${booking.amount}</div>
+                      <div className="text-xl font-bold">₹{booking.amount}</div>
                       <Button size="sm" variant="outline" className="rounded-lg mt-2">
                         Leave Review
                       </Button>
@@ -345,7 +343,7 @@ export function UserDashboard() {
                       <p className="text-sm text-muted-foreground mt-1">Recurring every week</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">${booking.amount}</div>
+                      <div className="text-2xl font-bold text-primary">₹{booking.amount}</div>
                       <div className="text-xs text-muted-foreground">per service</div>
                     </div>
                   </div>
