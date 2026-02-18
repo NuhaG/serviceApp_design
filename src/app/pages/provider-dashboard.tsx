@@ -15,7 +15,7 @@ import {
 } from "../components/ui/select";
 import {
   TrendingUp,
-  DollarSign,
+  IndianRupee,
   Calendar,
   CheckCircle,
   XCircle,
@@ -199,7 +199,7 @@ export function ProviderDashboard() {
           <Card className="p-5 rounded-lg border-l-4 border-l-accent">
             <div className="flex items-center justify-between mb-2">
               <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-accent" />
+                <IndianRupee className="w-6 h-6 text-accent" />
               </div>
             </div>
             <div className="text-3xl font-bold mb-1">Rs {stats.monthlyEarnings}</div>
