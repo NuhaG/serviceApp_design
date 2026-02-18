@@ -13,19 +13,33 @@ import {
   XCircle,
   Award,
   Calendar,
-  DollarSign,
   Shield,
   AlertTriangle,
+  Heart,
 } from "lucide-react";
-import { mockProviders } from "../data/mock-data";
 import { useThemeClass } from "../hooks/useThemeClass";
+import { useMarketplaceData } from "../hooks/useMarketplaceData";
+import { useState } from "react";
 
 export function ProviderProfilePage() {
   const { id } = useParams();
-  const provider = mockProviders.find((p) => p.id === id);
+  const themeClass = useThemeClass();
+  const { providers, loading, isFavoriteProvider, toggleFavoriteProvider } = useMarketplaceData();
+  const provider = providers.find((p) => p.id === id);
+  const [message, setMessage] = useState<string | null>(null);
+
+  if (loading) {
+    return (
+      <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold">Loading provider...</h1>
+        </div>
+      </div>
+    );
+  }
 
   if (!provider) {
-    const themeClass = useThemeClass();
     return (
       <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
         <Navigation />
@@ -38,13 +52,16 @@ export function ProviderProfilePage() {
 
   const cancellationRate = ((provider.cancellations / provider.totalBookings) * 100).toFixed(1);
 
-  const themeClass = useThemeClass();
-
   return (
     <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
       <Navigation />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {message && (
+          <Card className="p-4 rounded-xl mb-6 border-blue-500/30 bg-blue-500/10">
+            <p className="text-sm text-blue-700 dark:text-blue-300">{message}</p>
+          </Card>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
@@ -66,10 +83,10 @@ export function ProviderProfilePage() {
                           <span className="font-semibold text-sm sm:text-base">{provider.rating}</span>
                           <span className="text-muted-foreground text-xs sm:text-sm">({provider.reviews.length} reviews)</span>
                         </div>
-                        <span className="text-muted-foreground hidden xs:inline">•</span>
+                        <span className="text-muted-foreground hidden xs:inline">|</span>
                         <div className="flex items-center gap-1 text-muted-foreground text-sm">
                           <MapPin className="w-4 h-4" />
-                          {provider.distance} away
+                          {provider.location}
                         </div>
                       </div>
                     </div>
@@ -80,6 +97,9 @@ export function ProviderProfilePage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="rounded-lg text-xs sm:text-sm">
+                      Service Pair: {provider.serviceTuple[0]} + {provider.serviceTuple[1]}
+                    </Badge>
                     {provider.services.slice(0, 3).map((service) => (
                       <Badge key={service} variant="outline" className="rounded-lg text-xs sm:text-sm">
                         {service}
@@ -210,7 +230,7 @@ export function ProviderProfilePage() {
             <Card className="p-4 sm:p-6 rounded-xl lg:sticky lg:top-24">
               <div className="mb-4 sm:mb-6">
                 <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
-                  ₹{provider.basePrice}
+                  Rs {provider.basePrice}
                   <span className="text-sm sm:text-base font-normal text-muted-foreground">/service</span>
                 </div>
                 <div className="text-xs sm:text-sm text-muted-foreground">Base price</div>
@@ -223,25 +243,25 @@ export function ProviderProfilePage() {
                 <div className="space-y-2 text-xs sm:text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Base Price</span>
-                    <span className="font-medium">₹{provider.basePrice}</span>
+                    <span className="font-medium">Rs {provider.basePrice}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Booking Charge</span>
-                    <span className="font-medium">₹{provider.bookingCharge}</span>
+                    <span className="font-medium">Rs {provider.bookingCharge}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Consultation Fee</span>
-                    <span className="font-medium">₹{provider.consultationFee}</span>
+                    <span className="font-medium">Rs {provider.consultationFee}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Service Fee</span>
-                    <span className="font-medium">₹{provider.serviceFee}</span>
+                    <span className="font-medium">Rs {provider.serviceFee}</span>
                   </div>
                   <Separator className="my-2" />
                   <div className="flex justify-between font-semibold text-sm sm:text-base">
                     <span>Total</span>
                     <span className="text-primary">
-                      ₹
+                      Rs{" "}
                       {provider.basePrice +
                         provider.bookingCharge +
                         provider.consultationFee +
@@ -258,7 +278,26 @@ export function ProviderProfilePage() {
                 </Button>
               </Link>
 
-              <Button size="lg" variant="outline" className="w-full rounded-xl text-sm sm:text-base">
+              <Button
+                size="lg"
+                variant={isFavoriteProvider(provider.id) ? "default" : "outline"}
+                className="w-full rounded-xl text-sm sm:text-base mb-2 sm:mb-3"
+                onClick={() => toggleFavoriteProvider(provider.id)}
+              >
+                <Heart
+                  className={`w-4 h-4 sm:w-5 sm:h-5 mr-2 ${
+                    isFavoriteProvider(provider.id) ? "fill-current" : ""
+                  }`}
+                />
+                {isFavoriteProvider(provider.id) ? "Saved Provider" : "Save Provider"}
+              </Button>
+
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full rounded-xl text-sm sm:text-base"
+                onClick={() => setMessage(`Message sent to ${provider.name}. They will respond shortly.`)}
+              >
                 Send Message
               </Button>
 

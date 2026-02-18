@@ -16,8 +16,42 @@ export function Navigation() {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light' | null>(null);
 
+  const applyTheme = (next: "dark" | "light") => {
+    setTheme(next);
+    if (next === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    try {
+      localStorage.setItem("theme", next);
+    } catch (e) {}
+    try {
+      window.dispatchEvent(new CustomEvent("themechange", { detail: next }));
+    } catch (e) {}
+  };
+
+  const toggleTheme = () => {
+    const isDark = document.documentElement.classList.contains("dark");
+    applyTheme(isDark ? "light" : "dark");
+  };
+
   // Initialize and listen for theme changes
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem("theme");
+      if (stored === "dark" || stored === "light") {
+        applyTheme(stored);
+      } else {
+        const prefersDark =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        applyTheme(prefersDark ? "dark" : "light");
+      }
+    } catch (e) {
+      setTheme("light");
+    }
+
     const updateTheme = () => {
       const isDark = document.documentElement.classList.contains('dark');
       setTheme(isDark ? 'dark' : 'light');
@@ -44,11 +78,22 @@ export function Navigation() {
     };
   }, []);
 
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   const isActive = (path: string) => location.pathname === path;
 
   const navItem = (path: string) =>
     `
-    relative rounded-xl transition-all duration-200
+    relative rounded-lg transition-all duration-200
     ${isActive(path)
       ? "bg-primary text-primary-foreground shadow-sm"
       : "hover:bg-[var(--color-secondary-hover)] hover:text-foreground"
@@ -56,7 +101,7 @@ export function Navigation() {
   `;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
 
@@ -65,16 +110,18 @@ export function Navigation() {
             to="/"
             className="flex items-center space-x-2 sm:space-x-3 group"
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary rounded-2xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
               <Briefcase className="w-4 sm:w-5 h-4 sm:h-5 text-primary-foreground" />
             </div>
-            <span className="text-sm sm:text-lg font-semibold tracking-tight text-foreground">
-              ApnaSahara
-            </span>
+            <div className="leading-tight">
+              <div className="text-sm sm:text-lg font-extrabold tracking-tight text-foreground">
+                Servzy
+              </div>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-1.5 bg-muted/60 border border-border rounded-lg p-1">
 
             <Link to="/search">
               <Button
@@ -118,23 +165,8 @@ export function Navigation() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => {
-                const isDark = document.documentElement.classList.contains('dark');
-                const next = isDark ? 'light' : 'dark';
-                // Update state immediately for instant UI feedback
-                setTheme(next);
-                // Update DOM
-                if (next === 'dark') {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
-                // Update storage
-                try { localStorage.setItem('theme', next); } catch (e) {}
-                // Dispatch event to notify other listeners
-                try { window.dispatchEvent(new CustomEvent('themechange', { detail: next })); } catch (e) {}
-              }}
-              className="rounded-xl hover:bg-[var(--color-secondary-hover)]"
+              onClick={toggleTheme}
+              className="rounded-md hover:bg-[var(--color-secondary-hover)]"
             >
               {theme === 'dark' ? (
                 <Sun className="w-4 h-4" />
@@ -151,7 +183,7 @@ export function Navigation() {
               variant="ghost"
               size="icon"
               onClick={() => setOpen(!open)}
-              className="rounded-xl hover:bg-[var(--color-secondary-hover)]"
+              className="rounded-md hover:bg-[var(--color-secondary-hover)]"
             >
               {open ? (
                 <X className="w-5 h-5" />
@@ -165,8 +197,8 @@ export function Navigation() {
 
       {/* Mobile Dropdown */}
       {open && (
-        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md">
-          <div className="px-4 py-6 space-y-3">
+        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-md max-h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="px-4 py-6 space-y-3 pb-8">
 
             <Link to="/search" onClick={() => setOpen(false)}>
               <Button
@@ -211,22 +243,7 @@ export function Navigation() {
               <Button
                 variant="ghost"
                 className="w-full justify-start"
-                onClick={() => {
-                  const isDark = document.documentElement.classList.contains('dark');
-                  const next = isDark ? 'light' : 'dark';
-                  // Update state immediately for instant UI feedback
-                  setTheme(next);
-                  // Update DOM
-                  if (next === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                  // Update storage
-                  try { localStorage.setItem('theme', next); } catch (e) {}
-                  // Dispatch event to notify other listeners
-                  try { window.dispatchEvent(new CustomEvent('themechange', { detail: next })); } catch (e) {}
-                }}
+                onClick={toggleTheme}
               >
                 {theme === 'dark' ? (
                   <Sun className="w-4 h-4 mr-2" />
@@ -242,34 +259,4 @@ export function Navigation() {
       )}
     </nav>
   );
-}
-
-// initialize theme state on mount
-// (placed after component to keep logic colocated)
-function useInitializeTheme(setTheme: (t: 'dark'|'light'|null)=>void) {
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('theme');
-      if (stored === 'dark') {
-        document.documentElement.classList.add('dark');
-        setTheme('dark');
-        return;
-      }
-      if (stored === 'light') {
-        document.documentElement.classList.remove('dark');
-        setTheme('light');
-        return;
-      }
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
-        document.documentElement.classList.add('dark');
-        setTheme('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        setTheme('light');
-      }
-    } catch (e) {
-      setTheme('light');
-    }
-  }, [setTheme]);
 }

@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigation } from "../components/navigation";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Progress } from "../components/ui/progress";
-import { Separator } from "../components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Input } from "../components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import {
   TrendingUp,
   DollarSign,
@@ -15,44 +22,89 @@ import {
   AlertTriangle,
   Clock,
 } from "lucide-react";
-import { mockProviderBookings, mockProviders } from "../data/mock-data";
 import { useThemeClass } from "../hooks/useThemeClass";
+import { useMarketplaceData } from "../hooks/useMarketplaceData";
+import { Booking } from "../data/mock-data";
 
 export function ProviderDashboard() {
   const [activeTab, setActiveTab] = useState("requests");
+  const [selectedProviderId, setSelectedProviderId] = useState<string>("");
+  const [bookingSearch, setBookingSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "pending" | "confirmed" | "completed" | "cancelled"
+  >("all");
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
   const themeClass = useThemeClass();
+  const { providerBookings, providers, loading } = useMarketplaceData();
 
-  // Calculate stats from mock data
-  const pendingBookings = mockProviderBookings.filter(b => b.status === "pending");
-  const confirmedBookings = mockProviderBookings.filter(b => b.status === "confirmed");
-  const completedBookings = mockProviderBookings.filter(b => b.status === "completed");
-  const cancelledBookings = mockProviderBookings.filter(b => b.status === "cancelled");
-  
-  // Use first provider's stats as reference
-  const firstProvider = mockProviders[0];
-  const totalEarnings = mockProviderBookings
-    .filter(b => b.status === "completed")
-    .reduce((sum, b) => sum + b.amount, 0);
-  
-  const monthlyEarnings = totalEarnings * 0.19; // Approximate last month
+  useEffect(() => {
+    setBookings(providerBookings);
+  }, [providerBookings]);
+
+  useEffect(() => {
+    if (!selectedProviderId && providers.length > 0) {
+      setSelectedProviderId(providers[0].id);
+    }
+  }, [providers, selectedProviderId]);
+
+  const selectedProvider = useMemo(
+    () => providers.find((provider) => provider.id === selectedProviderId) ?? null,
+    [providers, selectedProviderId]
+  );
+
+  const providerBookingsOnly = useMemo(
+    () => bookings.filter((booking) => booking.providerId === selectedProviderId),
+    [bookings, selectedProviderId]
+  );
+
+  const filteredBookings = useMemo(() => {
+    const normalized = bookingSearch.trim().toLowerCase();
+    return providerBookingsOnly.filter((booking) => {
+      const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
+      const matchesSearch =
+        normalized.length === 0 ||
+        booking.providerName.toLowerCase().includes(normalized) ||
+        booking.service.toLowerCase().includes(normalized);
+      return matchesStatus && matchesSearch;
+    });
+  }, [providerBookingsOnly, statusFilter, bookingSearch]);
+
+  const pendingBookings = providerBookingsOnly.filter((booking) => booking.status === "pending");
+  const confirmedBookings = providerBookingsOnly.filter(
+    (booking) => booking.status === "confirmed"
+  );
+  const completedBookings = providerBookingsOnly.filter(
+    (booking) => booking.status === "completed"
+  );
+  const cancelledBookings = providerBookingsOnly.filter(
+    (booking) => booking.status === "cancelled"
+  );
+
+  const totalEarnings = completedBookings.reduce((sum, booking) => sum + booking.amount, 0);
+  const monthlyEarnings = Math.round(totalEarnings * 0.24);
+  const totalHandled = providerBookingsOnly.length;
+  const acceptedCount = completedBookings.length + confirmedBookings.length;
+  const liveAcceptRate = totalHandled > 0 ? Math.round((acceptedCount / totalHandled) * 100) : 0;
 
   const stats = {
-    reliabilityScore: firstProvider?.reliabilityScore || 98,
+    reliabilityScore: selectedProvider?.reliabilityScore ?? 0,
     totalEarnings: Math.round(totalEarnings),
-    monthlyEarnings: Math.round(monthlyEarnings),
+    monthlyEarnings,
     pendingRequests: pendingBookings.length,
     upcomingBookings: confirmedBookings.length,
     cancellations: cancelledBookings.length,
-    acceptRate: firstProvider?.acceptRate || 95,
+    acceptRate: liveAcceptRate,
   };
 
-  const handleAccept = (bookingId: string) => {
-    console.log("Accepted booking:", bookingId);
-  };
-
-  const handleReject = (bookingId: string) => {
-    console.log("Rejected booking:", bookingId);
+  const handleStatusChange = (bookingId: string, nextStatus: Booking["status"], note: string) => {
+    setBookings((previous) =>
+      previous.map((booking) =>
+        booking.id === bookingId ? { ...booking, status: nextStatus } : booking
+      )
+    );
+    setInfoMessage(note);
   };
 
   return (
@@ -60,40 +112,107 @@ export function ProviderDashboard() {
       <Navigation />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Provider Dashboard</h1>
-          <p className="text-muted-foreground">Manage your bookings and track your performance</p>
-        </div>
+        <Card className="mb-6 overflow-hidden border-border/70 rounded-lg">
+          <div className="h-1.5 bg-gradient-to-r from-primary via-accent to-primary/40" />
+          <div className="p-4 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-1">Provider Operations</h1>
+              <p className="text-muted-foreground">
+                {selectedProvider?.name ?? "Selected provider"} in {selectedProvider?.location ?? "India"}
+              </p>
+            </div>
+            <Badge variant="outline" className="w-fit rounded-md border-primary/30 text-primary">
+              {stats.pendingRequests} requests awaiting action
+            </Badge>
+          </div>
+        </Card>
+        {loading && (
+          <Card className="p-4 rounded-lg mb-6">
+            <p className="text-muted-foreground">Loading dashboard data...</p>
+          </Card>
+        )}
+        {infoMessage && (
+          <Card className="p-4 rounded-lg mb-6 border-emerald-500/30 bg-emerald-500/10">
+            <p className="text-sm text-emerald-700 dark:text-emerald-300">{infoMessage}</p>
+          </Card>
+        )}
 
-        {/* Stats Grid */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 rounded-xl">
+        <Card className="p-4 sm:p-6 rounded-lg mb-6 border-border/80">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <p className="text-xs text-muted-foreground mb-2">Select Provider</p>
+              <Select value={selectedProviderId} onValueChange={setSelectedProviderId}>
+                <SelectTrigger className="rounded-lg">
+                  <SelectValue placeholder="Choose provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  {providers.map((provider) => (
+                    <SelectItem key={provider.id} value={provider.id}>
+                      {provider.name} - {provider.location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-2">Search Bookings</p>
+              <Input
+                value={bookingSearch}
+                onChange={(event) => setBookingSearch(event.target.value)}
+                placeholder="Search customer or service..."
+                className="rounded-lg"
+              />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-2">Status Filter</p>
+              <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as typeof statusFilter)}>
+                <SelectTrigger className="rounded-lg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </Card>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+          <Card className="p-5 rounded-lg border-l-4 border-l-primary">
             <div className="flex items-center justify-between mb-2">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-primary" />
               </div>
-              <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 rounded-lg">Excellent</Badge>
+              <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 rounded-lg">
+                Live
+              </Badge>
             </div>
             <div className="text-3xl font-bold mb-1">{stats.reliabilityScore}%</div>
             <div className="text-sm text-muted-foreground">Reliability Score</div>
             <Progress value={stats.reliabilityScore} className="h-2 mt-3" />
           </Card>
 
-          <Card className="p-6 rounded-xl">
+          <Card className="p-5 rounded-lg border-l-4 border-l-accent">
             <div className="flex items-center justify-between mb-2">
-              <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center">
                 <DollarSign className="w-6 h-6 text-accent" />
               </div>
             </div>
-            <div className="text-3xl font-bold mb-1">₹{stats.monthlyEarnings}</div>
-            <div className="text-sm text-muted-foreground">This Month</div>
-            <div className="text-xs text-muted-foreground mt-2">Total: ₹{stats.totalEarnings.toLocaleString()}</div>
+            <div className="text-3xl font-bold mb-1">Rs {stats.monthlyEarnings}</div>
+            <div className="text-sm text-muted-foreground">Estimated This Month</div>
+            <div className="text-xs text-muted-foreground mt-2">
+              Total: Rs {stats.totalEarnings.toLocaleString()}
+            </div>
           </Card>
 
-          <Card className="p-6 rounded-xl">
+          <Card className="p-5 rounded-lg border-l-4 border-l-blue-500">
             <div className="flex items-center justify-between mb-2">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               {stats.pendingRequests > 0 && (
                 <Badge className="bg-rose-500/20 text-rose-600 dark:text-rose-500 rounded-lg">
@@ -103,57 +222,58 @@ export function ProviderDashboard() {
             </div>
             <div className="text-3xl font-bold mb-1">{stats.upcomingBookings}</div>
             <div className="text-sm text-muted-foreground">Upcoming Bookings</div>
-            <div className="text-xs text-muted-foreground mt-2">{stats.pendingRequests} pending requests</div>
+            <div className="text-xs text-muted-foreground mt-2">
+              {stats.pendingRequests} pending requests
+            </div>
           </Card>
 
-          <Card className="p-6 rounded-xl">
+          <Card className="p-5 rounded-lg border-l-4 border-l-emerald-500">
             <div className="flex items-center justify-between mb-2">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              <div className="w-12 h-12 bg-emerald-500/10 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
             <div className="text-3xl font-bold mb-1">{stats.acceptRate}%</div>
-            <div className="text-sm text-muted-foreground">Accept Rate</div>
-            <div className="text-xs text-muted-foreground mt-2">{stats.cancellations} cancellations</div>
+            <div className="text-sm text-muted-foreground">Current Accept Rate</div>
+            <div className="text-xs text-muted-foreground mt-2">
+              {stats.cancellations} cancellations
+            </div>
           </Card>
         </div>
 
-        {/* Reliability Impact Notice */}
-        <Card className="p-4 rounded-xl bg-amber-50 border-amber-200 mb-6">
+        <Card className="p-4 rounded-lg bg-amber-500/10 border-amber-500/25 mb-6">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
-              <div className="font-semibold text-amber-900 mb-1">
+              <div className="font-semibold text-amber-800 dark:text-amber-300 mb-1">
                 Reliability Score Impact Notice
               </div>
-              <div className="text-amber-800">
-                Canceling a booking will reduce your reliability score by 5-10 points. Rejecting
-                too many requests may also impact your visibility to customers.
+              <div className="text-amber-700 dark:text-amber-300">
+                Accepting and completing jobs improves reliability. Rejections and cancellations
+                lower ranking and visibility.
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3 rounded-xl">
+          <TabsList className="grid w-full max-w-md grid-cols-3 rounded-md">
             <TabsTrigger value="requests" className="rounded-lg">
-              Requests ({stats.pendingRequests})
+              Requests ({pendingBookings.length})
             </TabsTrigger>
             <TabsTrigger value="upcoming" className="rounded-lg">
-              Upcoming
+              Upcoming ({confirmedBookings.length})
             </TabsTrigger>
             <TabsTrigger value="history" className="rounded-lg">
-              History
+              History ({completedBookings.length})
             </TabsTrigger>
           </TabsList>
 
-          {/* Incoming Requests */}
           <TabsContent value="requests" className="space-y-4">
-            {mockProviderBookings
-              .filter((b) => b.status === "pending")
+            {filteredBookings
+              .filter((booking) => booking.status === "pending")
               .map((booking) => (
-                <Card key={booking.id} className="p-6 rounded-xl">
+                <Card key={booking.id} className="p-6 rounded-lg">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
@@ -165,68 +285,61 @@ export function ProviderDashboard() {
                       <p className="text-muted-foreground">{booking.service}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">₹{booking.amount}</div>
+                      <div className="text-2xl font-bold text-primary">Rs {booking.amount}</div>
                       <div className="text-xs text-muted-foreground">Your earnings</div>
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                      <span>{booking.date}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                      <span>{booking.time}</span>
-                    </div>
-                    <div>
-                      <Badge variant="outline" className="rounded-lg capitalize">
-                        {booking.type}
-                      </Badge>
-                    </div>
+                  <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {booking.date}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      {booking.time}
+                    </span>
+                    <Badge variant="outline" className="rounded-md capitalize">
+                      {booking.type}
+                    </Badge>
                   </div>
 
-                  <Separator className="my-4" />
-
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <Button
-                      className="flex-1 rounded-xl bg-accent hover:bg-accent/90"
-                      onClick={() => handleAccept(booking.id)}
+                      className="flex-1 rounded-lg bg-accent hover:bg-accent/90"
+                      onClick={() =>
+                        handleStatusChange(booking.id, "confirmed", "Booking accepted and moved to upcoming.")
+                      }
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
                       Accept Booking
                     </Button>
                     <Button
                       variant="outline"
-                      className="flex-1 rounded-xl border-rose-600 text-rose-600 dark:text-rose-500 hover:bg-rose-500/10"
-                      onClick={() => handleReject(booking.id)}
+                      className="flex-1 rounded-lg border-rose-600 text-rose-600 dark:text-rose-500 hover:bg-rose-500/10"
+                      onClick={() =>
+                        handleStatusChange(booking.id, "cancelled", "Booking rejected and moved to cancelled.")
+                      }
                     >
                       <XCircle className="w-4 h-4 mr-2 text-rose-600 dark:text-rose-500" />
                       Reject
                     </Button>
                   </div>
-
-                  <div className="mt-3 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-600 dark:text-rose-500">
-                    <AlertTriangle className="w-3 h-3 inline mr-1 text-rose-600 dark:text-rose-500" />
-                    Rejecting this request will decrease your accept rate and may affect your
-                    ranking
-                  </div>
                 </Card>
               ))}
-            {mockProviderBookings.filter((b) => b.status === "pending").length === 0 && (
-              <Card className="p-12 text-center rounded-xl">
+            {filteredBookings.filter((booking) => booking.status === "pending").length === 0 && (
+              <Card className="p-12 text-center rounded-lg">
                 <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">No pending requests at the moment</p>
+                <p className="text-muted-foreground">No pending requests for this provider.</p>
               </Card>
             )}
           </TabsContent>
 
-          {/* Upcoming Bookings */}
           <TabsContent value="upcoming" className="space-y-4">
-            {mockProviderBookings
-              .filter((b) => b.status === "confirmed")
+            {filteredBookings
+              .filter((booking) => booking.status === "confirmed")
               .map((booking) => (
-                <Card key={booking.id} className="p-6 rounded-xl">
+                <Card key={booking.id} className="p-6 rounded-lg">
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
@@ -238,80 +351,87 @@ export function ProviderDashboard() {
                       <p className="text-muted-foreground">{booking.service}</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">₹{booking.amount}</div>
+                      <div className="text-2xl font-bold text-primary">Rs {booking.amount}</div>
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                      <span>{booking.date}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                      <span>{booking.time}</span>
-                    </div>
-                    <div>
-                      <Badge variant="outline" className="rounded-lg capitalize">
-                        {booking.type}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <Separator className="my-4" />
-
-                  <div className="flex gap-3">
-                    <Button className="flex-1 rounded-xl" variant="outline">
-                      View Details
-                    </Button>
-                    <Button className="flex-1 rounded-xl" variant="outline">
-                      Contact Customer
-                    </Button>
-                  </div>
-
-                  <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-xl text-xs text-amber-700 flex items-start gap-2">
-                    <AlertTriangle className="w-3 h-3 flex-shrink-0 mt-0.5" />
-                    <span>
-                      Canceling this confirmed booking will reduce your reliability score by 8-10
-                      points
+                  <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {booking.date}
                     </span>
+                    <span className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      {booking.time}
+                    </span>
+                    <Badge variant="outline" className="rounded-md capitalize">
+                      {booking.type}
+                    </Badge>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      className="flex-1 rounded-lg"
+                      onClick={() =>
+                        handleStatusChange(booking.id, "completed", "Booking marked as completed.")
+                      }
+                    >
+                      Mark Completed
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 rounded-lg border-rose-600 text-rose-600 dark:text-rose-500 hover:bg-rose-500/10"
+                      onClick={() =>
+                        handleStatusChange(booking.id, "cancelled", "Booking cancelled by provider.")
+                      }
+                    >
+                      Cancel Booking
+                    </Button>
                   </div>
                 </Card>
               ))}
+            {filteredBookings.filter((booking) => booking.status === "confirmed").length === 0 && (
+              <Card className="p-12 text-center rounded-lg">
+                <p className="text-muted-foreground">No upcoming bookings match this filter.</p>
+              </Card>
+            )}
           </TabsContent>
 
-          {/* History */}
           <TabsContent value="history" className="space-y-4">
-            {mockProviderBookings
-              .filter((b) => b.status === "completed")
+            {filteredBookings
+              .filter((booking) => booking.status === "completed" || booking.status === "cancelled")
               .map((booking) => (
-                <Card key={booking.id} className="p-6 rounded-xl opacity-75">
+                <Card key={booking.id} className="p-6 rounded-lg opacity-85">
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold">{booking.providerName}</h3>
-                        <Badge variant="outline" className="rounded-lg">
-                          Completed
+                        <Badge
+                          variant="outline"
+                          className={`rounded-lg ${booking.status === "cancelled" ? "text-rose-600 border-rose-300" : ""}`}
+                        >
+                          {booking.status}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{booking.service}</p>
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <span>{booking.date}</span>
-                        <span>•</span>
+                        <span>|</span>
                         <span>{booking.time}</span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xl font-bold text-foreground">₹{booking.amount}</div>
+                      <div className="text-xl font-bold text-foreground">Rs {booking.amount}</div>
                     </div>
                   </div>
                 </Card>
               ))}
-            <Card className="p-12 text-center rounded-xl">
-              <p className="text-muted-foreground">
-                Showing recent completed bookings. View full history in your account settings.
-              </p>
-            </Card>
+            {filteredBookings.filter((booking) => booking.status === "completed" || booking.status === "cancelled")
+              .length === 0 && (
+              <Card className="p-12 text-center rounded-lg">
+                <p className="text-muted-foreground">No history available for this provider.</p>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>

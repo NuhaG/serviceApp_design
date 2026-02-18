@@ -13,23 +13,34 @@ import {
   Calendar as CalendarIcon,
   Clock,
   AlertTriangle,
-  CheckCircle,
-  DollarSign,
-  IndianRupee
+  CheckCircle
 } from "lucide-react";
-import { mockProviders } from "../data/mock-data";
 import { useThemeClass } from "../hooks/useThemeClass";
+import { useMarketplaceData } from "../hooks/useMarketplaceData";
 
 export function BookingConfirmationPage() {
   const { providerId } = useParams();
   const navigate = useNavigate();
-  const provider = mockProviders.find((p) => p.id === providerId);
+  const themeClass = useThemeClass();
+  const { providers, loading, bookProvider } = useMarketplaceData();
+  const provider = providers.find((p) => p.id === providerId);
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [time, setTime] = useState("10:00");
   const [bookingType, setBookingType] = useState<"one-time" | "contract">("one-time");
+  const [message, setMessage] = useState<string | null>(null);
+
+  if (loading) {
+    return (
+      <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold">Loading provider...</h1>
+        </div>
+      </div>
+    );
+  }
 
   if (!provider) {
-    const themeClass = useThemeClass();
     return (
       <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
         <Navigation />
@@ -49,12 +60,18 @@ export function BookingConfirmationPage() {
     provider.serviceFee +
     cancellationFee;
 
-  const handleConfirmBooking = () => {
-    // In a real app, this would make an API call
-    navigate("/user-dashboard");
+  const handleConfirmBooking = async () => {
+    if (!provider || !date || !time) {
+      setMessage("Please select both date and time.");
+      return;
+    }
+    const formattedDate = date.toISOString().slice(0, 10);
+    await bookProvider(provider.id, formattedDate, time, bookingType);
+    setMessage("Booking confirmed. Redirecting to your dashboard...");
+    setTimeout(() => {
+      navigate("/user-dashboard");
+    }, 700);
   };
-
-  const themeClass = useThemeClass();
 
   return (
     <div className={`${themeClass} min-h-screen bg-background text-foreground`}>
@@ -67,6 +84,11 @@ export function BookingConfirmationPage() {
             Review the details and complete your service booking
           </p>
         </div>
+        {message && (
+          <Card className="p-4 mb-6 rounded-xl border-emerald-500/30 bg-emerald-500/10">
+            <p className="text-sm text-emerald-700 dark:text-emerald-300">{message}</p>
+          </Card>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -87,7 +109,7 @@ export function BookingConfirmationPage() {
                       <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                       <span className="text-sm font-medium">{provider.rating}</span>
                     </div>
-                    <span className="text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">|</span>
                     <Badge variant="secondary" className="rounded-lg">
                       {provider.reliabilityScore}% Reliability
                     </Badge>
@@ -195,14 +217,14 @@ export function BookingConfirmationPage() {
 
             {/* Warnings */}
             {provider.cancellations > 3 && (
-              <Card className="p-4 rounded-xl bg-amber-50 border-amber-200">
+              <Card className="p-4 rounded-xl bg-amber-500/10 border-amber-500/25">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                   <div className="text-sm">
-                    <div className="font-semibold text-amber-900 mb-1">
+                    <div className="font-semibold text-amber-800 dark:text-amber-300 mb-1">
                       Provider Cancellation Notice
                     </div>
-                    <div className="text-amber-800">
+                    <div className="text-amber-700 dark:text-amber-300">
                       This provider has {provider.cancellations} previous cancellations. If they
                       cancel this booking, their reliability score will drop by 5-10 points.
                     </div>
@@ -211,13 +233,13 @@ export function BookingConfirmationPage() {
               </Card>
             )}
 
-            <Card className="p-4 rounded-xl bg-blue-50 border-blue-200">
+            <Card className="p-4 rounded-xl bg-blue-500/10 border-blue-500/25">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <AlertTriangle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <div className="font-semibold text-blue-900 mb-1">Cancellation Policy</div>
-                  <div className="text-blue-800">
-                    If you cancel within 24 hours of the appointment, a ₹15 cancellation fee will
+                  <div className="font-semibold text-blue-800 dark:text-blue-300 mb-1">Cancellation Policy</div>
+                  <div className="text-blue-700 dark:text-blue-300">
+                    If you cancel within 24 hours of the appointment, a Rs 15 cancellation fee will
                     apply and your user rating may be affected.
                   </div>
                 </div>
@@ -255,19 +277,19 @@ export function BookingConfirmationPage() {
                 <h3 className="font-semibold mb-3">Price Breakdown</h3>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Base Price</span>
-                  <span className="font-medium">₹{provider.basePrice}</span>
+                  <span className="font-medium">Rs {provider.basePrice}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Booking Charge</span>
-                  <span className="font-medium">₹{provider.bookingCharge}</span>
+                  <span className="font-medium">Rs {provider.bookingCharge}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Consultation Fee</span>
-                  <span className="font-medium">₹{provider.consultationFee}</span>
+                  <span className="font-medium">Rs {provider.consultationFee}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Service Fee</span>
-                  <span className="font-medium">₹{provider.serviceFee}</span>
+                  <span className="font-medium">Rs {provider.serviceFee}</span>
                 </div>
                 {hasPreviousCancellations && (
                   <div className="flex justify-between text-sm">
@@ -275,18 +297,18 @@ export function BookingConfirmationPage() {
                       Cancellation Insurance
                       <AlertTriangle className="w-3 h-3 text-amber-600" />
                     </span>
-                    <span className="font-medium text-amber-700">₹{cancellationFee}</span>
+                    <span className="font-medium text-amber-700 dark:text-amber-300">Rs {cancellationFee}</span>
                   </div>
                 )}
                 <Separator className="my-2" />
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total</span>
-                  <span className="text-primary">₹{total}</span>
+                  <span className="text-primary">Rs {total}</span>
                 </div>
               </div>
 
               {hasPreviousCancellations && (
-                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
+                <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/25 rounded-xl text-xs text-amber-700 dark:text-amber-300">
                   Cancellation insurance added due to provider's previous cancellations
                 </div>
               )}
@@ -295,9 +317,9 @@ export function BookingConfirmationPage() {
                 size="lg"
                 className="w-full rounded-xl mb-3"
                 onClick={handleConfirmBooking}
+                disabled={!date || !time}
               >
-                {/* <IndianRupee className="w-5 h-5 mr-2" /> */}
-                Confirm & Pay ₹{total}
+                Confirm & Pay Rs {total}
               </Button>
 
               <Button

@@ -80,110 +80,77 @@
 
 :root {
   --font-size: 16px;
-
-  /* Background & foreground */
-  --background: #f8f2ed; /* warm light background */
-  --foreground: #1a1d26; /* dark text */
-
-  /* Cards & popovers */
+  --brand: #7c3aed;
+  --background: #f7f6fb;
+  --foreground: #161223;
   --card: #ffffff;
-  --card-foreground: #1a1d26;
+  --card-foreground: #161223;
   --popover: #ffffff;
-  --popover-foreground: #1a1d26;
-
-  /* Primary colors */
-  --primary: #ff7f7f; /* saturated pink */
-  --primary-hover: #ff9999;
-  --primary-foreground: #1a1d26;
-
-  /* Secondary colors */
-  --secondary: #f0e8e5; /* soft neutral secondary */
-  --secondary-hover: #e8ded9;
-  --secondary-foreground: #1a1d26;
-
-  /* Accent colors */
-  --accent: #ff7f7f;
-  --accent-hover: #ff9999;
-  --accent-foreground: #1a1d26;
-
-  /* Muted colors */
-  --muted: #ede8ea; /* neutral muted */
-  --muted-foreground: #6b6e7f;
-
-  /* Destructive colors */
-  --destructive: #ff7f7f;
-  --destructive-hover: #ff9999;
-  --destructive-foreground: #1a1d26;
-
-  /* Borders, inputs, rings */
-  --border: rgba(0, 0, 0, 0.1);
+  --popover-foreground: #161223;
+  --primary: var(--brand);
+  --primary-hover: #6d28d9;
+  --primary-foreground: #ffffff;
+  --secondary: #f0ecfb;
+  --secondary-hover: #e7def8;
+  --secondary-foreground: #161223;
+  --accent: #16a34a;
+  --accent-hover: #15803d;
+  --accent-foreground: #ffffff;
+  --muted: #f3f4f6;
+  --muted-foreground: #64748b;
+  --destructive: #dc2626;
+  --destructive-hover: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --border: #dfd7ef;
   --input: #ffffff;
-  --input-background: #f8f2ed;
-  --switch-background: #ff7f7f;
-  --ring: #ff9999;
-
-  /* Radius */
-  --radius: 0.75rem;
-
-  /* Sidebar */
-  --sidebar: #f8f2ed; /* warm sidebar */
-  --sidebar-foreground: #1a1d26;
-  --sidebar-primary: #ff7f7f;
-  --sidebar-primary-foreground: #1a1d26;
-  --sidebar-accent: #f0e8e5;
-  --sidebar-accent-foreground: #1a1d26;
-  --sidebar-border: rgba(0, 0, 0, 0.1);
-  --sidebar-ring: #ff9999;
+  --input-background: #ffffff;
+  --switch-background: #d5d1e2;
+  --ring: var(--brand);
+  --radius: 0.65rem;
+  --sidebar: #f2eefd;
+  --sidebar-foreground: #161223;
+  --sidebar-primary: #161223;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e7def8;
+  --sidebar-accent-foreground: #161223;
+  --sidebar-border: #dfd7ef;
+  --sidebar-ring: #161223;
 }
 
 .dark {
-  --background: #1a1d26;
-  --foreground: #fff2ef;
-
-  --card: #2f3548;
-  --card-foreground: #fff2ef;
-
-  --popover: #2f3548;
-  --popover-foreground: #fff2ef;
-
-  --primary: #f7a5a5;
-  --primary-hover: #e88e8e;
-  --primary-foreground: #1a1d26;
-
-  --secondary: #3a4158;
-  --secondary-hover: #444c66;
-  --secondary-foreground: #fff2ef;
-
-  --accent: #f7a5a5;
-  --accent-hover: #e88e8e;
-  --accent-foreground: #1a1d26;
-
-  --muted: #2f3548;
-  --muted-foreground: #fff2ef;
-
-  --destructive: #f7a5a5;
-  --destructive-hover: #e88e8e;
-  --destructive-foreground: #1a1d26;
-
-  /* Slightly darker border for separation */
-  --border: rgba(93, 104, 138, 0.4);
-
-  --input: #2f3548;
-  --ring: #e88e8e;
-
-  --radius: 0.75rem;
-
-  --sidebar: #242936;
-  --sidebar-foreground: #fff2ef;
-
-  --sidebar-primary: #f7a5a5;
-  --sidebar-primary-foreground: #1a1d26;
-
-  --sidebar-accent: #3a4158;
-  --sidebar-accent-foreground: #fff2ef;
-
-  --sidebar-border: rgba(93, 104, 138, 0.4);
-  --sidebar-ring: #e88e8e;
+  --brand: #a78bfa;
+  --background: #120f1f;
+  --foreground: #f3f0ff;
+  --card: #1a1630;
+  --card-foreground: #f3f0ff;
+  --popover: #1a1630;
+  --popover-foreground: #f3f0ff;
+  --primary: var(--brand);
+  --primary-hover: #8b5cf6;
+  --primary-foreground: #120f1f;
+  --secondary: #241f3d;
+  --secondary-hover: #2f2850;
+  --secondary-foreground: #f3f0ff;
+  --accent: #4ade80;
+  --accent-hover: #22c55e;
+  --accent-foreground: #04250f;
+  --muted: #241f3d;
+  --muted-foreground: #94a3b8;
+  --destructive: #f87171;
+  --destructive-hover: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #362f55;
+  --input: #1a1630;
+  --ring: var(--brand);
+  --radius: 0.65rem;
+  --sidebar: #19152c;
+  --sidebar-foreground: #f3f0ff;
+  --sidebar-primary: #f3f0ff;
+  --sidebar-primary-foreground: #1a1630;
+  --sidebar-accent: #241f3d;
+  --sidebar-accent-foreground: #f3f0ff;
+  --sidebar-border: #362f55;
+  --sidebar-ring: #ddd6fe;
 }
 
 @theme inline {
@@ -239,7 +206,7 @@
   body {
     @apply bg-background text-foreground;
     font-family:
-      "Inter",
+      "Manrope",
       -apple-system,
       BlinkMacSystemFont,
       "Segoe UI",

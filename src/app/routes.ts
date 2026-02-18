@@ -6,6 +6,7 @@ import { BookingConfirmationPage } from "./pages/booking-confirmation-page";
 import { ProviderDashboard } from "./pages/provider-dashboard";
 import { UserDashboard } from "./pages/user-dashboard";
 import { AdminDashboard } from "./pages/admin-dashboard";
+import { NotFoundPage } from "./pages/not-found-page";
 
 export const router = createBrowserRouter([
   {
@@ -35,5 +36,9 @@ export const router = createBrowserRouter([
   {
     path: "/admin",
     Component: AdminDashboard,
+  },
+  {
+    path: "*",
+    Component: NotFoundPage,
   },
 ]);
