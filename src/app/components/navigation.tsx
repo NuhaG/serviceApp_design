@@ -110,15 +110,19 @@ export function Navigation() {
             to="/"
             className="flex items-center space-x-2 sm:space-x-3 group"
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
-              <Briefcase className="w-4 sm:w-5 h-4 sm:h-5 text-primary-foreground" />
-            </div>
-            <div className="leading-tight">
-              <div className="text-sm sm:text-lg font-extrabold tracking-tight text-foreground">
-                Servzy
-              </div>
-            </div>
+            <div className="flex items-center justify-start transition-transform duration-200 group-hover:scale-105">
+  <img 
+    src="/images/servzy-Photoroom.png"
+    alt="Servzy Logo"
+    className="h-32 object-contain"
+  />
+</div>
+
+
+             
           </Link>
+           
+     
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1.5 bg-muted/60 border border-border rounded-lg p-1">
