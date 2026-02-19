@@ -25,10 +25,10 @@ export function Navigation() {
     }
     try {
       localStorage.setItem("theme", next);
-    } catch (e) {}
+    } catch (e) { }
     try {
       window.dispatchEvent(new CustomEvent("themechange", { detail: next }));
-    } catch (e) {}
+    } catch (e) { }
   };
 
   const toggleTheme = () => {
@@ -111,18 +111,13 @@ export function Navigation() {
             className="flex items-center space-x-2 sm:space-x-3 group"
           >
             <div className="flex items-center justify-start transition-transform duration-200 group-hover:scale-105">
-  <img 
-    src="/images/servzy-Photoroom.png"
-    alt="Servzy Logo"
-    className="h-32 object-contain"
-  />
-</div>
-
-
-             
+              <img
+                src="/images/servzy-Photoroom.png"
+                alt="Servzy"
+                className="h-32 object-contain"
+              />
+            </div>
           </Link>
-           
-     
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1.5 bg-muted/60 border border-border rounded-lg p-1">
